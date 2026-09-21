@@ -1,6 +1,7 @@
 // Reusable report styles. Requires Typst 0.12 or newer.
 
 #let body-font = ("Times New Roman", "Tinos", "Liberation Serif")
+#let code-font = ("Courier New", "Liberation Mono")
 
 #let word-single-factor = 1.15
 #let word-single = word-single-factor * 1em
@@ -11,6 +12,9 @@
 
 #let indent = 1.25cm
 #let text-width = 16.5cm
+#let table-compact-inset = (left: 0.08in, right: 0.08in, top: 0in, bottom: 0in)
+#let table-padded-inset = (left: 0.16cm, right: 0.16cm, top: 0.12cm, bottom: 0.12cm)
+#let table-cell-inset = table-compact-inset
 
 #let para-style(
   size: 14pt,
@@ -62,6 +66,17 @@
     keep-next: true,
     breakable: false,
   ),
+  structural-heading: para-style(
+    size: 18pt,
+    weight: "bold",
+    caps: true,
+    align: "center",
+    line: 1.5,
+    after: 10pt,
+    page-break-before: true,
+    keep-next: true,
+    breakable: false,
+  ),
   heading2: para-style(
     size: 16pt,
     weight: "bold",
@@ -93,12 +108,25 @@
     shape: "italic",
     align: "left",
     line: 1.0,
-    before: 6pt,
+    before: 0.0835in,
   ),
   table-cell: para-style(
     size: 12pt,
     align: "left",
     line: 1.0,
+  ),
+  listing: para-style(
+    size: 10pt,
+    align: "left",
+    line: 1.0,
+  ),
+  listing-caption: para-style(
+    size: 14pt,
+    shape: "italic",
+    align: "left",
+    line: 1.0,
+    before: 0.0835in,
+    after: 0pt,
   ),
   source-entry: para-style(
     size: 14pt,
@@ -118,7 +146,7 @@
     size: 14pt,
     align: "justify",
     line: 1.5,
-    first-line: 1.885cm,
+    first-line: indent,
   ),
 )
 
@@ -155,6 +183,7 @@
   above: space-above(s),
   below: space-below(s, followed-by: followed-by),
   breakable: s.breakable,
+  sticky: s.keep-next,
   {
     show: style-par(s)
     let content = style-text(s, body)
@@ -213,7 +242,11 @@
   )
 
   show heading: it => {
-    let s = heading-styles.at(it.level - 1, default: heading-styles.last())
+    let s = if it.level == 1 and it.numbering == none {
+      word-styles.structural-heading
+    } else {
+      heading-styles.at(it.level - 1, default: heading-styles.last())
+    }
     let number = if it.numbering != none {
       counter(heading).display(it.numbering) + h(0.4em)
     } else {
@@ -221,12 +254,6 @@
     }
     if s.page-break-before { pagebreak(weak: true) }
     styled(s, number + it.body)
-  }
-
-  show heading.where(level: 1): it => {
-    counter(figure.where(kind: image)).update(0)
-    counter(figure.where(kind: table)).update(0)
-    it
   }
 
   let item-style = word-styles.list-item
@@ -253,13 +280,13 @@
 
   set table(
     stroke: 0.5pt + black,
-    inset: (left: 0.19cm, right: 0.19cm, top: 0pt, bottom: 0pt),
+    inset: table-cell-inset,
   )
   let cell-style = word-styles.table-cell
   show table: set text(size: cell-style.size)
   show table: style-par(cell-style)
 
-  set figure.caption(separator: [ ])
+  set figure.caption(separator: [ – ])
   let fig-style = word-styles.figure-caption
   let fig-gap = fig-style.after + extra-lead(fig-style.line, fig-style.size)
   show figure.where(kind: image): set figure(gap: fig-gap)
@@ -278,7 +305,7 @@
   show figure.where(kind: table): set figure.caption(position: top)
   show figure.where(kind: table): set std.align(left)
   show figure.where(kind: table): set block(
-    above: cap-style.before,
+    above: body-lead + cap-style.before,
     below: space-below(cap-style),
   )
   show figure.where(kind: table): it => {
@@ -298,7 +325,7 @@
   caption: caption,
   kind: image,
   supplement: [Рисунок],
-  numbering: n => context numbering("1.1", counter(heading).get().first(), n),
+  numbering: "1",
 )
 
 #let screenshot(src, caption: none, width: auto) = figure-image(
@@ -318,6 +345,7 @@
   caption: none,
   header: none,
   align: left,
+  cell-inset: table-compact-inset,
   ..rows,
 ) = {
   let cell-align = align
@@ -325,15 +353,126 @@
     table(
       columns: columns,
       align: cell-align,
+      inset: cell-inset,
       ..if header != none {
-        (table.header(..header.map(c => std.align(center, strong(c)))),)
+        (table.header(
+          ..header.map(c => table.cell(
+            inset: cell-inset,
+            std.align(center, strong(c)),
+          )),
+        ),)
       } else { () },
       ..rows.pos().flatten(),
     ),
     caption: caption,
     kind: table,
     supplement: [Таблица],
-    numbering: n => context numbering("1.1", counter(heading).get().first(), n),
+    numbering: "1",
+  )
+}
+
+#let numbered-table(
+  columns: auto,
+  caption: none,
+  header: none,
+  repeat-header: false,
+  align: left,
+  cell-inset: table-compact-inset,
+  ..cells,
+) = {
+  let cap-style = word-styles.table-caption
+  let table-count = counter(figure.where(kind: table))
+
+  table-count.step()
+  block(
+    above: body-lead + cap-style.before,
+    below: space-below(cap-style),
+    breakable: true,
+    {
+      if caption != none {
+        block(
+          width: 100%,
+          below: cap-style.after,
+          sticky: true,
+          {
+            show: style-par(cap-style)
+            std.align(
+              align-of(cap-style),
+              style-text(
+                cap-style,
+                context [Таблица #table-count.display("1") – #caption],
+              ),
+            )
+          },
+        )
+      }
+
+      table(
+        columns: columns,
+        align: align,
+        inset: cell-inset,
+        ..if header != none {
+          (table.header(
+            repeat: repeat-header,
+            ..header.map(cell => table.cell(
+              inset: cell-inset,
+              std.align(center, strong(cell)),
+            )),
+          ),)
+        } else { () },
+        ..cells.pos().flatten(),
+      )
+    },
+  )
+}
+
+#let listing-counter = counter("code-listing")
+
+#let code-listing(body, caption: none, lang: none) = {
+  let code-style = word-styles.listing
+  let caption-style = word-styles.listing-caption
+  let code = if type(body) == str {
+    raw(body, block: true)
+  } else if type(body) == content and body.func() == raw {
+    raw(body.text, block: true)
+  } else {
+    body
+  }
+
+  listing-counter.step()
+  block(
+    width: 100%,
+    above: body-lead + caption-style.before,
+    below: space-below(code-style),
+    breakable: true,
+    {
+      if caption != none {
+        block(
+          width: 100%,
+          below: caption-style.after,
+          {
+            show: style-par(caption-style)
+            style-text(
+              caption-style,
+              [Листинг #context listing-counter.display("1") — #caption],
+            )
+          },
+        )
+      }
+      block(
+        width: 100%,
+        breakable: true,
+        fill: white,
+        stroke: 0.5pt + black,
+        inset: (top: 1pt, right: 0.075in, bottom: 0pt, left: 0.075in),
+        {
+          set text(font: code-font, size: code-style.size, fill: black)
+          show raw: set text(font: code-font, size: code-style.size, fill: black)
+          show: style-par(code-style)
+          code
+        },
+      )
+    },
   )
 }
 
