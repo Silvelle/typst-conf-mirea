@@ -1,34 +1,76 @@
-# Typst configuration
+# Конфигурация отчётов Typst
 
-Reusable report styles are stored in `template/report.typ`.
-
-Import the required functions into a Typst document, for example:
+Переиспользуемые стили отчётов находятся в `template/report.typ`.
+Подключите нужные функции в документе:
 
 ```typst
 #import "template/report.typ": conf
 
 #show: conf.with(
-  title: "Document title",
-  author: "Author",
+  title: "Название документа",
+  author: "Автор",
 )
 ```
 
-The style engine includes formatting for body text, headings, lists, tables,
-figures, captions, plain black numbered code listings, contents, sources, and
-page numbering. The first page is counted but its number is hidden by default,
-as required for a title page.
+Конфигурация оформляет основной текст, заголовки, списки, таблицы, рисунки,
+подписи, нумерованные листинги без цветовой подсветки, содержание, список
+источников и номера страниц. Первая страница учитывается, но её номер по
+умолчанию скрыт. Параметр `page-number-start` задаёт страницу, начиная с которой
+номер должен отображаться; предшествующие страницы также учитываются в счётчике.
 
-Requires Typst 0.12 or newer.
+Рисунки, таблицы и листинги нумеруются в пределах раздела (ГОСТ 6.5.6, 6.6.4):
+первая цифра — номер текущего заголовка первого уровня, вторая — порядковый
+номер внутри него, например `Рисунок 2.3`. Заголовки второго и третьего
+уровня на эту нумерацию не влияют. Вне нумерованных разделов (до первого
+заголовка первого уровня или внутри `section(...)` без номера) используется
+простая сквозная нумерация: `Рисунок 1`, `Рисунок 2`. Для содержимого фигур,
+собранного не через `figure-image`/`figure-table`, эту же схему подключает
+функция `chapter-numbering`, переданная в `numbering:` вызова `figure`.
 
-## Complete example
+Требуется Typst 0.13 или новее.
 
-[`example-report.typ`](example-report.typ) explains the available settings and
-demonstrates headings, lists, tables, code listings, figures, contents, source
-lists, and page numbering. Its compiled output is
+## Состав шаблона
+
+`template/report.typ` — точка входа: функция `conf` и реэкспорт публичных
+функций. Остальные модули подключать напрямую не нужно.
+
+| Файл | Содержимое |
+|---|---|
+| `template/styles.typ` | Шрифты, размеры, отступы, именованные стили абзацев и вспомогательные функции их вывода |
+| `template/headings.typ` | Заголовки трёх уровней, `section`, `contents` |
+| `template/lists.typ` | Маркированные и нумерованные списки, `sources-list` |
+| `template/figures.typ` | `figure-image`, `figure-table` и оформление подписей |
+| `template/code.typ` | `code-listing` |
+
+Публичные функции: `conf`, `section`, `contents`, `figure-image`,
+`figure-table`, `code-listing`, `sources-list`, `chapter-numbering`.
+
+## Демонстрационный отчёт
+
+[`example-report.typ`](example-report.typ) на русском языке описывает
+используемые стили и показывает их в готовом документе: заголовки трёх уровней,
+основной текст, списки, таблицы, рисунки, листинги, содержание и список
+источников. Собранная версия находится в
 [`example-report.pdf`](example-report.pdf).
 
-Rebuild the PDF from the project root:
+Сборка из корня проекта:
 
 ```sh
 typst compile example-report.typ example-report.pdf
 ```
+
+## Подготовка к пакету
+
+Файл `typst.toml` уже содержит базовую секцию `[package]`, однако до локального
+или публичного выпуска нужно:
+
+- добавить `license` и файл `LICENSE`;
+- указать минимальную версию компилятора в поле `compiler`;
+- добавить `repository` после публикации репозитория;
+- использовать не более трёх допустимых значений `categories`;
+- добавить `[template]`, только если пакет должен поддерживать `typst init`.
+
+Поля `name`, `version` и `entrypoint` обязательны для компилятора. Для
+публикации в Typst Universe также обязательны `authors`, `license` и
+`description`. Актуальные правила описаны в официальной
+[документации манифеста](https://github.com/typst/packages/blob/main/docs/manifest.md).
