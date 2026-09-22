@@ -16,8 +16,9 @@
     it
   }
 
+  // Images: caption centred underneath, in the caption's own size.
   let cap = styles.figure-caption
-  let gap = cap.after + lead-of(cap)
+  let gap = cap.after + lead-of(cap) // picture-to-caption distance
   show figure.where(kind: image): set figure(gap: gap)
   show figure.where(kind: image): set block(above: gap, below: space-below(cap))
   show figure.where(kind: image): it => {
@@ -26,10 +27,13 @@
     it
   }
 
+  // Table body: thin grid, 12 pt single-spaced cells.
   let tcap = styles.table-caption
   set table(stroke: 0.5pt + black, inset: table-inset)
   show table: set text(size: styles.table-cell.size)
   show table: style-par(styles.table-cell)
+
+  // Table caption: above the table and flush left, unlike a figure caption.
   show figure.where(kind: table): set figure(gap: tcap.after)
   show figure.where(kind: table): set figure.caption(position: top)
   show figure.where(kind: table): set align(left)
@@ -38,6 +42,7 @@
     below: space-below(tcap),
   )
   show figure.where(kind: table): it => {
+    // `sticky` keeps the caption on the page with the table it names.
     show figure.caption: c => block(
       width: 100%,
       sticky: true,
@@ -50,27 +55,23 @@
   doc
 }
 
-// Wraps ready-made content — typically `image(...)`, but any diagram built
-// from Typst primitives works too — as a figure captioned "Рисунок N" /
-// "Рисунок N.M". Call `image()` yourself in the document that uses this
-// function, with a path relative to that document's own project (a leading
-// `/` resolves against its root). Passing a bare path string here would
-// resolve it against this package's own files instead of the caller's,
-// because `image()` always resolves paths relative to the file that
-// contains the call — silently wrong once this module is used as a package.
+// Wraps ready-made content — an `image(...)` or a diagram built from Typst
+// primitives — as a numbered figure.
+// Call `image()` in your own document rather than passing a path here:
+// `image()` resolves paths against the file holding the call, so a path
+// string would be looked up inside this package, not the caller's project.
 #let figure-image(body, caption: none) = figure(
   body,
   caption: caption,
   kind: image,
   supplement: [Рисунок],
-  // A number only ever shows as part of a caption, so an uncaptioned figure
-  // must not take one and leave a gap in the sequence.
+  // A number only shows as part of a caption, so an uncaptioned figure must
+  // not take one and leave a gap in the sequence.
   numbering: if caption == none { none } else { chapter-numbering },
 )
 
-// `header` is a tuple of cells rendered bold and centred; `..cells` are the
-// remaining cells in row-major order. Long tables split across pages and
-// repeat their header unless told otherwise.
+// `header` is a tuple of cells, set bold and centred; `..cells` are the rest
+// in row-major order. Long tables split across pages, repeating the header.
 #let figure-table(
   columns: auto,
   caption: none,
@@ -81,16 +82,17 @@
   inset: table-inset,
   ..cells,
 ) = figure(
-  // `breakable` wraps the table body itself, not the figure — a local
-  // `show figure: set block(...)` here would turn this function's return
-  // value into a styled wrapper, and `#figure-table(...) <label>` would then
-  // fail with "cannot reference styled" instead of labelling the table.
+  // `breakable` wraps the table body itself, not the figure: a local
+  // `show figure: set block(...)` would make this function return a styled
+  // wrapper, and `#figure-table(...) <label>` would then fail with
+  // "cannot reference styled" instead of labelling the table.
   block(
     breakable: breakable,
     table(
       columns: columns,
       align: align,
       inset: inset,
+      // Spread nothing when the table has no header row.
       ..if header == none { () } else {
         (table.header(
           repeat: repeat-header,
