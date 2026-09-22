@@ -2,7 +2,7 @@
 // Requires Typst 0.14 or newer, which is where `image()` learned to read
 // PDFs — the usual way a ready-made title sheet arrives.
 //
-// #import "@local/gostovka:0.1.0": conf
+// #import "@local/typst-conf-mirea:0.1.0": conf
 // #show: conf.with(title: "Название отчёта", author: "Автор")
 
 #import "styles.typ": body-font, number-gap, style-par, styles

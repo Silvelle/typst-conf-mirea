@@ -8,7 +8,7 @@
 ## Быстрый старт
 
 ```typst
-#import "@local/gostovka:0.1.0": conf
+#import "@local/typst-conf-mirea:0.1.0": conf
 
 #show: conf.with(
   title: "Название документа",
@@ -175,7 +175,7 @@
 Функции сочетаются в одном документе как обычные вызовы Typst:
 
 ```typst
-#import "@local/gostovka:0.1.0": (
+#import "@local/typst-conf-mirea:0.1.0": (
   code-listing, conf, contents, figure-image, figure-table, section,
   sources-list,
 )

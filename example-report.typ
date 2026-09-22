@@ -332,11 +332,11 @@
 Оформление разделено на модули по назначению. `lib.typ` в корне — точка входа
 пакета: он реэкспортирует публичные функции `template/report.typ`, поэтому
 документу-потребителю достаточно одного импорта вида
-`#import "@local/gostovka:0.1.0": conf`.
+`#import "@local/typst-conf-mirea:0.1.0": conf`.
 
 #code-listing(
   ```text
-  gostovka/
+  typst-conf-mirea/
   ├── typst.toml
   ├── lib.typ
   ├── template/
@@ -354,7 +354,7 @@
 )
 
 Такое разделение уже даёт пакет, готовый к локальной установке
-(`@local/gostovka:0.1.0`). Для публикации в Typst Universe манифест
+(`@local/typst-conf-mirea:0.1.0`). Для публикации в Typst Universe манифест
 `typst.toml` потребуется дополнить лицензией.
 
 Исходный файл примера компилируется из корня проекта командой

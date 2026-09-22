@@ -1,5 +1,5 @@
 [package]
-name = "gostovka"
+name = "typst-conf-mirea"
 version = "0.1.0"
 entrypoint = "lib.typ"
 authors = ["Silvelle <https://github.com/Silvelle>"]
