@@ -19,7 +19,6 @@
   let cap = styles.listing-caption
   let code = if type(body) == str { raw(body, block: true) } else { body }
 
-  listing-counter.step()
   block(
     width: 100%,
     above: body-lead + cap.before,
@@ -27,6 +26,9 @@
     breakable: true,
     {
       if caption != none {
+        // Only a captioned listing takes a number: an unnumbered snippet
+        // must not consume one and leave a gap in the sequence.
+        listing-counter.step()
         block(width: 100%, below: cap.after, sticky: true, {
           show: style-par(cap)
           style-text(

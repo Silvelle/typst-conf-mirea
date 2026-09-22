@@ -50,12 +50,22 @@
   doc
 }
 
-#let figure-image(src, caption: none, width: auto, alt: none) = figure(
-  image(src, width: width, alt: alt),
+// Wraps ready-made content — typically `image(...)`, but any diagram built
+// from Typst primitives works too — as a figure captioned "Рисунок N" /
+// "Рисунок N.M". Call `image()` yourself in the document that uses this
+// function, with a path relative to that document's own project (a leading
+// `/` resolves against its root). Passing a bare path string here would
+// resolve it against this package's own files instead of the caller's,
+// because `image()` always resolves paths relative to the file that
+// contains the call — silently wrong once this module is used as a package.
+#let figure-image(body, caption: none) = figure(
+  body,
   caption: caption,
   kind: image,
   supplement: [Рисунок],
-  numbering: chapter-numbering,
+  // A number only ever shows as part of a caption, so an uncaptioned figure
+  // must not take one and leave a gap in the sequence.
+  numbering: if caption == none { none } else { chapter-numbering },
 )
 
 // `header` is a tuple of cells rendered bold and centred; `..cells` are the
@@ -70,9 +80,13 @@
   align: left,
   inset: table-inset,
   ..cells,
-) = {
-  show figure: set block(breakable: breakable)
-  figure(
+) = figure(
+  // `breakable` wraps the table body itself, not the figure — a local
+  // `show figure: set block(...)` here would turn this function's return
+  // value into a styled wrapper, and `#figure-table(...) <label>` would then
+  // fail with "cannot reference styled" instead of labelling the table.
+  block(
+    breakable: breakable,
     table(
       columns: columns,
       align: align,
@@ -88,9 +102,9 @@
       },
       ..cells.pos().flatten(),
     ),
-    caption: caption,
-    kind: table,
-    supplement: [Таблица],
-    numbering: chapter-numbering,
-  )
-}
+  ),
+  caption: caption,
+  kind: table,
+  supplement: [Таблица],
+  numbering: if caption == none { none } else { chapter-numbering },
+)

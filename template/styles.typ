@@ -7,6 +7,11 @@
 #let marker-width = 0.635cm
 #let table-inset = (left: 0.08in, right: 0.08in, top: 0in, bottom: 0in)
 
+// Distance the page number keeps from the text area. The reference document
+// leaves the number similar slack inside its 0.75 cm footer band; without it
+// a block that fills the text area to the very edge ends up touching it.
+#let number-gap = 0.3cm
+
 // Word calls 1.15 of the font size "single" spacing, so a multiplier of 1.5
 // really means 1.15 * 1.5. Typst measures `leading` as the gap between lines,
 // hence the font size has to be subtracted from that product.
@@ -127,19 +132,3 @@
     pad(left: s.left, std.align(align-of(s), style-text(s, body)))
   },
 )
-
-// A paragraph whose first line starts with a marker in a fixed-width box.
-#let marked-par(marker, body) = par(
-  box(width: marker-width, std.align(left, marker)) + body,
-)
-
-// Numbers the children of an `enum`, honouring explicit `+ 3.` numbers.
-#let enum-items(it) = {
-  let n = 0
-  let items = ()
-  for child in it.children {
-    n = if type(child.number) == int { child.number } else { n + 1 }
-    items.push((numbering("1.", n), child.body))
-  }
-  items
-}

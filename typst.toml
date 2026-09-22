@@ -1,4 +1,11 @@
-  [package]
-  name = "basic-report"
-  version = "0.1.0"
-  entrypoint = "template/report.typ"
+[package]
+name = "gostovka"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Silvelle <https://github.com/Silvelle>"]
+license = "MIT"
+description = "Стили ГОСТ-подобных отчётов для Typst: заголовки, рисунки, таблицы, листинги и список источников с нумерацией по разделам."
+repository = "https://github.com/Silvelle/typst"
+categories = ["report", "layout"]
+compiler = "0.14.0"
+exclude = ["example-report.typ", "example-report.pdf", "references", "assets"]
