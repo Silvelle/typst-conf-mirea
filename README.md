@@ -1,4 +1,4 @@
-# gostovka
+# Typst configuration for reports in RTU MIREA
 
 Стили оформления учебных и технических отчётов по ГОСТ для
 [Typst](https://typst.app/): формат страницы, шрифт, заголовки, списки,
