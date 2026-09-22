@@ -70,9 +70,9 @@
     size: 18pt,
     weight: "bold",
     caps: true,
-    align: "center",
     line: 1.5,
     after: 10pt,
+    left: indent,
     page-break-before: true,
     keep-next: true,
     breakable: false,
@@ -198,15 +198,16 @@
   title: "",
   author: none,
   page-number-position: "footer",
-  // Page 1 is counted but its number is hidden, as required for a title page.
-  show-page-number-on-first-page: false,
+  // Pages before this number are counted, but their numbers are not printed.
+  // Set to 3, for example, when the title matter occupies two pages.
+  page-number-start: 2,
   doc,
 ) = {
   set document(title: title, author: if author != none { author } else { "" })
 
   let page-number = context {
     let n = counter(page).get().first()
-    if n == 1 and not show-page-number-on-first-page {
+    if n < page-number-start {
       []
     } else {
       align(center, text(font: body-font, size: 11pt, str(n)))
