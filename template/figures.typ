@@ -1,4 +1,4 @@
-// Numbered images and tables. Captions follow "Рисунок N – …" / "Таблица N – …".
+// Numbered images and tables. Captions read "Рисунок N – …" / "Таблица N – …".
 
 #import "styles.typ": (
   align-of, body-lead, lead-of, space-below, style-par, style-text, styles,
@@ -8,13 +8,6 @@
 
 #let figure-rules(doc) = {
   set figure.caption(separator: [ – ])
-
-  // Restart image and table numbering at each chapter (GOST 6.5.6, 6.6.4).
-  show heading.where(level: 1): it => {
-    counter(figure.where(kind: image)).update(0)
-    counter(figure.where(kind: table)).update(0)
-    it
-  }
 
   // Images: caption centred underneath, in the caption's own size.
   let cap = styles.figure-caption
@@ -37,7 +30,13 @@
   show figure.where(kind: table): set figure(gap: tcap.after)
   show figure.where(kind: table): set figure.caption(position: top)
   show figure.where(kind: table): set align(left)
+  // `breakable` on the figure itself: without it a table taller than the
+  // space left on the page moves to the next one whole, leaving a gap, and a
+  // table taller than a page runs off its bottom edge. The inner block of
+  // `figure-table` keeps its own explicit value, so `breakable: false` there
+  // still holds the table together.
   show figure.where(kind: table): set block(
+    breakable: true,
     above: body-lead + tcap.before,
     below: space-below(tcap),
   )
@@ -56,10 +55,9 @@
 }
 
 // Wraps ready-made content — an `image(...)` or a diagram built from Typst
-// primitives — as a numbered figure.
-// Call `image()` in your own document rather than passing a path here:
-// `image()` resolves paths against the file holding the call, so a path
-// string would be looked up inside this package, not the caller's project.
+// primitives — as a numbered figure. Call `image()` in your own document
+// rather than passing a path here: `image()` resolves paths against the file
+// holding the call, so a path string would be looked up inside this package.
 #let figure-image(body, caption: none) = figure(
   body,
   caption: caption,
@@ -71,12 +69,14 @@
 )
 
 // `header` is a tuple of cells, set bold and centred; `..cells` are the rest
-// in row-major order. Long tables split across pages, repeating the header.
+// in row-major order. A long table splits across pages; GOST asks for
+// "Продолжение таблицы" there rather than a second header row, so the header
+// is not repeated by default.
 #let figure-table(
   columns: auto,
   caption: none,
   header: none,
-  repeat-header: true,
+  repeat-header: false,
   breakable: true,
   align: left,
   inset: table-inset,

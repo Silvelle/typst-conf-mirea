@@ -4,19 +4,14 @@
 #import "styles.typ": (
   body-lead, code-font, space-below, style-par, style-text, styles,
 )
-#import "headings.typ": chapter-label
+#import "headings.typ": chapter-numbering
 
-// Listings are not figures, so they need a counter of their own.
+// Listings are not figures, so they need a counter of their own; `conf`
+// restarts it at each chapter alongside the figure and table counters.
 #let listing-counter = counter("code-listing")
 
 // Marks a highlighted listing off from the page in place of the frame.
 #let listing-fill = rgb("#f2f2f2")
-
-// Restarts listing numbering at each chapter, matching figures and tables.
-#let listing-rules(doc) = {
-  show heading.where(level: 1): it => { listing-counter.update(0); it }
-  doc
-}
 
 #let code-listing(body, caption: none, highlight: false) = {
   let s = styles.listing
@@ -28,19 +23,19 @@
     width: 100%,
     above: body-lead + cap.before,
     below: space-below(s),
-    breakable: true, // long listings may run onto the next page
+    breakable: true,
     {
       if caption != none {
-        // Only a captioned listing takes a number: an unnumbered snippet
-        // must not consume one and leave a gap in the sequence.
+        // Only a captioned listing takes a number, so an unnumbered snippet
+        // leaves no gap in the sequence.
         listing-counter.step()
         // `sticky` keeps the caption with the code it names.
         block(width: 100%, below: cap.after, sticky: true, {
           show: style-par(cap)
-          style-text(
-            cap,
-            [Листинг #context chapter-label(listing-counter.get().first()) – #caption],
-          )
+          style-text(cap, [
+            Листинг #context chapter-numbering(listing-counter.get().first())
+            – #caption
+          ])
         })
       }
       // The frame, or the background that replaces it.
@@ -49,7 +44,6 @@
         breakable: true,
         fill: if highlight { listing-fill } else { white },
         stroke: if highlight { none } else { 0.5pt + black },
-        // Without a frame the code needs padding of its own.
         inset: if highlight {
           (x: 0.1in, y: 6pt)
         } else {

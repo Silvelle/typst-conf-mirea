@@ -1,6 +1,6 @@
 // Typographic tokens and the named paragraph styles built from them.
 
-// Fallbacks let the document build on machines without the Microsoft fonts.
+// Fallbacks let the document build without the Microsoft fonts.
 #let body-font = ("Times New Roman", "Tinos", "Liberation Serif")
 #let code-font = ("Courier New", "Liberation Mono")
 
@@ -9,12 +9,11 @@
 #let table-inset = (left: 0.08in, right: 0.08in, top: 0in, bottom: 0in)
 
 // Slack between the text area and the page number, mirroring the 0.75 cm
-// footer band of the reference document. At 0 a framed listing that fills
-// the text area to its edge ends up touching the number.
+// footer band of the reference document.
 #let number-gap = 0.3cm
 
-// Word's "single" spacing is 1.15 of the font size, so a 1.5 multiplier
-// means 1.15 * 1.5; Typst's `leading` is the gap between lines, hence -1.0.
+// Word's "single" spacing is 1.15 of the font size, so a 1.5 multiplier means
+// 1.15 * 1.5; Typst's `leading` is the gap between lines, hence -1.0.
 #let line-factor = 1.15
 #let extra-lead(mult, size) = (line-factor * mult - 1.0) * size
 #let leading-for(mult) = extra-lead(mult, 1em) // same, relative to font size
@@ -37,8 +36,7 @@
   breakable: true, // may split across pages
 )
 
-// Builds one style; the assert turns a mistyped field into a clear error
-// instead of a silently ignored setting.
+// Builds one style; the assert turns a mistyped field into a clear error.
 #let para-style(..fields) = {
   let named = fields.named()
   for key in named.keys() {
@@ -47,7 +45,6 @@
   style-defaults + named
 }
 
-// The styles the rest of the package refers to by name.
 #let styles = (
   body: para-style(align: "justify", first-line: indent),
   // Level 1 opens a new page and is set in capitals.
@@ -113,7 +110,6 @@
   justify: left,
 ).at(s.align)
 
-// Font side of a style.
 #let style-text(s, body) = text(
   size: s.size,
   weight: s.weight,

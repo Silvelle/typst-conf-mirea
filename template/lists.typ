@@ -13,12 +13,10 @@
 
 // Typst folds a nested list into the body of the item above it, so an item
 // arrives as inline content plus bare `list.item` / `enum.item` elements.
-// Left there they land inside `marked-par`'s `par`, which cannot hold
-// blocks — Typst then drops them without a word.
-// Returns (inline content, nested items).
+// Left there they land inside `marked-par`'s `par`, which cannot hold blocks —
+// Typst then drops them silently. Returns (inline content, nested items).
 #let split-nested(body) = {
   if body.func() == [].func() {
-    // A sequence: inline parts first, nested items after them.
     let inline = ()
     let nested = ()
     for part in body.children {
@@ -55,8 +53,8 @@
     let (inline, nested) = split-nested(child.body)
     marked-par(if ordered { numbering("1.", n) } else { [–] }, inline)
 
-    // Re-wrapping makes the show rule recurse, so deeper levels get the
-    // same treatment one indent further in.
+    // Re-wrapping makes the show rule recurse, so deeper levels get the same
+    // treatment one indent further in.
     if nested.len() > 0 {
       pad(left: indent, if ordered { enum(..nested) } else { list(..nested) })
     }
@@ -70,8 +68,8 @@
   doc
 }
 
-// Hanging indent and wider spacing for entries. Deliberately imposes no
-// bibliographic standard — the wording of each entry is the author's.
+// Hanging indent and wider spacing for entries. Imposes no bibliographic
+// standard — the wording of each entry is the author's.
 #let sources-list(body) = {
   let s = styles.source-entry
   show enum: it => render-items(

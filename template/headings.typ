@@ -2,20 +2,40 @@
 
 #import "styles.typ": space-below, style-par, styled, styles
 
-// Number of the open top-level heading, or `none` before the first one and
-// inside unnumbered ones like `section([Заключение])`. Only level 1 touches
-// it: GOST 6.5.6 and 6.6.4 scope figure and table numbers to the раздел,
-// not to subsections.
-#let chapter-number = state("chapter-number", none)
+// Figures, tables and listings are numbered within a раздел (GOST 6.5.6,
+// 6.6.4): "4.1" inside chapter 4, plain "1" outside one. Typst only ever
+// steps the first level of such a counter, so the chapter is folded into
+// that single number and unfolded again when it is printed. Holding the
+// chapter in the counter, rather than reading the heading counter where the
+// number appears, is what makes a reference show the chapter of the table it
+// points at instead of the chapter it stands in.
+#let chapter-scale = 1000
 
-// "2.3" inside chapter 2, plain "3" outside one. Needs a `context`.
-#let chapter-label(n) = {
-  let chapter = chapter-number.get()
-  if chapter == none { [#n] } else { [#chapter.#n] }
+#let chapter-numbering(..nums) = {
+  let n = nums.pos().first()
+  if n < chapter-scale { numbering("1", n) } else {
+    numbering(
+      "1.1",
+      calc.div-euclid(n, chapter-scale),
+      calc.rem(n, chapter-scale),
+    )
+  }
 }
 
-// Adapts `chapter-label` to the signature `figure(numbering: ...)` expects.
-#let chapter-numbering(..nums) = context chapter-label(nums.pos().first())
+// Restarts `counters` at every chapter, at that chapter's number.
+#let restart-each-chapter(..counters) = doc => {
+  show heading.where(level: 1): it => {
+    // After `it`, so the heading counter has already taken its new value.
+    it
+    context {
+      let chapter = if it.numbering == none { 0 } else {
+        counter(heading).get().first()
+      }
+      for c in counters.pos() { c.update(chapter * chapter-scale) }
+    }
+  }
+  doc
+}
 
 #let heading-rules(doc) = {
   set heading(numbering: "1.1.1")
@@ -24,18 +44,9 @@
   show heading: it => {
     // Levels below 3 keep the level-3 style.
     let s = by-level.at(it.level - 1, default: by-level.last())
-
     let number = if it.numbering == none { [] } else {
       counter(heading).display(it.numbering) + h(0.4em)
     }
-
-    // Publish the chapter number for figure, table and listing captions.
-    if it.level == 1 {
-      chapter-number.update(if it.numbering == none { none } else {
-        context counter(heading).get().first()
-      })
-    }
-
     // `weak` so an opening chapter does not leave a blank page behind it.
     if s.page-break-before { pagebreak(weak: true) }
     styled(s, number + it.body)
@@ -61,9 +72,9 @@
   show outline.entry: it => {
     show: style-par(s)
     set text(size: s.size)
-    // `above: 0pt` — the gap between entries comes from `below` alone.
+    // The gap between entries comes from `below` alone.
     block(above: 0pt, below: space-below(s, followed-by: s), it)
   }
-  // Levels are not indented: GOST asks for a flat list.
+  // GOST asks for a flat list, so the levels are not indented.
   outline(title: none, depth: depth, indent: 0pt)
 }
