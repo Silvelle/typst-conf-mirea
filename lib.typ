@@ -1,4 +1,2 @@
-// Package entrypoint. Re-exports the public API of `template/report.typ` so
-// that `#import "@local/typst-conf-mirea:0.1.0": conf, ...` works the same way
-// as importing the file directly inside this repository.
+// Package entrypoint: re-exports the public API of `template/report.typ`.
 #import "template/report.typ": *

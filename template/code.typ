@@ -1,8 +1,6 @@
-// Code listings, captioned "Листинг N – …": framed and monochrome for print,
-// or, with `highlight: true`, syntax-coloured on a tinted background.
-
 #import "styles.typ": (
-  body-lead, code-font, space-below, style-par, style-text, styles,
+  body-lead, code-font, rule-clearance, space-below, style-par, style-text,
+  styles,
 )
 #import "headings.typ": chapter-numbering
 
@@ -10,13 +8,9 @@
 // restarts it at each chapter alongside the figure and table counters.
 #let listing-counter = counter("code-listing")
 
-// Marks a highlighted listing off from the page in place of the frame.
-#let listing-fill = rgb("#f2f2f2")
-
 #let code-listing(body, caption: none, highlight: false) = {
   let s = styles.listing
   let cap = styles.listing-caption
-  // Accept a plain string as well as a ```…``` block.
   let code = if type(body) == str { raw(body, block: true) } else { body }
 
   block(
@@ -26,23 +20,24 @@
     breakable: true,
     {
       if caption != none {
-        // Only a captioned listing takes a number, so an unnumbered snippet
-        // leaves no gap in the sequence.
         listing-counter.step()
-        // `sticky` keeps the caption with the code it names.
-        block(width: 100%, below: cap.after, sticky: true, {
-          show: style-par(cap)
-          style-text(cap, [
-            Листинг #context chapter-numbering(listing-counter.get().first())
-            – #caption
-          ])
-        })
+        block(
+          width: 100%,
+          below: cap.after + rule-clearance,
+          sticky: true, // keeps the caption with the code it names
+          {
+            show: style-par(cap)
+            style-text(cap, [
+              Листинг #context chapter-numbering(listing-counter.get().first())
+              – #caption
+            ])
+          },
+        )
       }
-      // The frame, or the background that replaces it.
       block(
         width: 100%,
         breakable: true,
-        fill: if highlight { listing-fill } else { white },
+        fill: if highlight { rgb("#f2f2f2") } else { white },
         stroke: if highlight { none } else { 0.5pt + black },
         inset: if highlight {
           (x: 0.1in, y: 6pt)
@@ -54,7 +49,6 @@
           // since the highlighter sets its own colours per token.
           set raw(theme: if highlight { auto } else { none })
           set text(font: code-font, size: s.size)
-          // `raw` carries its own font, so it has to be set again here.
           show raw: set text(font: code-font, size: s.size)
           show: style-par(s)
           code

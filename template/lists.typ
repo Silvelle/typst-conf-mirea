@@ -1,20 +1,16 @@
-// Bullet and numbered lists, plus the reference list at the end of a report.
-
 #import "styles.typ": (
   indent, lead-of, leading-for, marker-width, space-above, space-below,
   style-par, styles,
 )
 
-// One item: the marker in a fixed-width box, then the text. A plain
-// paragraph, so wrapped lines return to the left margin as GOST expects.
+// A plain paragraph, so wrapped lines return to the left margin as GOST asks.
 #let marked-par(marker, body) = par(
   box(width: marker-width, std.align(left, marker)) + body,
 )
 
-// Typst folds a nested list into the body of the item above it, so an item
-// arrives as inline content plus bare `list.item` / `enum.item` elements.
-// Left there they land inside `marked-par`'s `par`, which cannot hold blocks —
-// Typst then drops them silently. Returns (inline content, nested items).
+// Typst folds a nested list into the body of the item above it. Left there
+// the bare items land inside `marked-par`'s `par`, which cannot hold blocks,
+// and Typst drops them silently. Returns (inline content, nested items).
 #let split-nested(body) = {
   if body.func() == [].func() {
     let inline = ()
@@ -28,14 +24,12 @@
     }
     (inline.join(), nested)
   } else if body.func() in (list.item, enum.item) {
-    ([], (body,)) // item with no text of its own
+    ([], (body,))
   } else {
-    (body, ()) // ordinary item, nothing nested
+    (body, ())
   }
 }
 
-// Flat marked paragraphs, one per child, with nested levels indented.
-// `spacing` is the gap between entries; `auto` keeps the line spacing of `s`.
 #let render-items(it, s, ordered: false, spacing: auto) = {
   show: style-par(s)
   set par(spacing: if spacing == auto { leading-for(s.line) } else { spacing })
@@ -43,7 +37,7 @@
   let n = 0
   for child in it.children {
     // Honour an explicit `7.`; items rebuilt from a nested level carry no
-    // resolved number, so `at` with a default rather than `child.number`.
+    // resolved number, hence `at` with a default rather than `child.number`.
     n = if type(child.at("number", default: none)) == int {
       child.number
     } else {
@@ -68,8 +62,6 @@
   doc
 }
 
-// Hanging indent and wider spacing for entries. Imposes no bibliographic
-// standard — the wording of each entry is the author's.
 #let sources-list(body) = {
   let s = styles.source-entry
   show enum: it => render-items(
