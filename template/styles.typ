@@ -3,7 +3,7 @@
 
 #let indent = 1.25cm
 #let marker-width = 0.635cm
-#let number-gap = 0.3cm
+#let number-gap = 11pt
 
 // The line box pinned in `conf` is tighter than the glyphs, so text sitting
 // against a rule needs this much to clear it.

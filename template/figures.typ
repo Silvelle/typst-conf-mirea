@@ -22,7 +22,10 @@
   // GOST wants "Продолжение таблицы" on a continued page rather than a second
   // header row; an explicit `table.header(repeat: true)` still wins.
   set table.header(repeat: false)
-  show table: set text(size: styles.table-cell.size)
+  show table: set text(
+    size: styles.table-cell.size,
+    costs: (orphan: 0%, widow: 0%),
+  )
   show table: style-par(styles.table-cell)
 
   show figure.where(kind: table): set figure(

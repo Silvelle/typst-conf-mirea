@@ -23,7 +23,13 @@
   let page-number = context {
     let n = counter(page).get().first()
     if n >= page-number-start {
-      align(center, text(font: body-font, size: 11pt, str(n)))
+      align(center, text(
+        font: body-font,
+        size: 11pt,
+        top-edge: "cap-height",
+        bottom-edge: "baseline",
+        str(n),
+      ))
     }
   }
 
