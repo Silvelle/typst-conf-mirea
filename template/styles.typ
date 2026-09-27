@@ -4,10 +4,8 @@
 #let indent = 1.25cm
 #let marker-width = 0.635cm
 #let number-gap = 11pt
-
-// The line box pinned in `conf` is tighter than the glyphs, so text sitting
-// against a rule needs this much to clear it.
 #let rule-clearance = 1pt
+
 #let table-inset = (
   left: 0.08in,
   right: 0.08in,
@@ -15,8 +13,6 @@
   bottom: rule-clearance,
 )
 
-// Word's "single" spacing is 1.15 of the font size; Typst's `leading` is the
-// gap between lines, hence -1.0.
 #let line-factor = 1.15
 #let extra-lead(mult, size) = (line-factor * mult - 1.0) * size
 #let leading-for(mult) = extra-lead(mult, 1em)
@@ -26,8 +22,8 @@
   weight: "regular",
   shape: "normal",
   caps: false,
-  align: "left", // "left", "center", "right" or "justify"
-  line: 1.5, // line spacing multiplier, as in Word
+  align: "left",
+  line: 1.5,
   before: 0pt,
   after: 0pt,
   left: 0pt,
@@ -83,8 +79,6 @@
 )
 
 #let lead-of(s) = extra-lead(s.line, s.size)
-
-// Word states block spacing on top of the line spacing, so both are added.
 #let space-above(s) = s.before + lead-of(s)
 #let space-below(s, followed-by: styles.body) = s.after + lead-of(followed-by)
 #let body-lead = lead-of(styles.body)

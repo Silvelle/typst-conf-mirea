@@ -1,10 +1,5 @@
 #import "styles.typ": space-below, style-par, styled, styles
 
-// Figures, tables and listings are numbered within a раздел (GOST 6.5.6,
-// 6.6.4). Typst only ever steps the first level of such a counter, so the
-// chapter is folded into that single number and unfolded when printed —
-// which is what makes a reference show the chapter of the table it points at
-// rather than the chapter it stands in.
 #let chapter-scale = 1000
 
 #let chapter-numbering(..nums) = {
@@ -20,7 +15,7 @@
 
 #let restart-each-chapter(..counters) = doc => {
   show heading.where(level: 1): it => {
-    it // first, so the heading counter has already taken its new value
+    it
     context {
       let chapter = if it.numbering == none { 0 } else {
         counter(heading).get().first()
@@ -40,7 +35,6 @@
     let number = if it.numbering == none { [] } else {
       counter(heading).display(it.numbering) + h(0.4em)
     }
-    // `weak` so an opening chapter does not leave a blank page behind it.
     if s.page-break-before { pagebreak(weak: true) }
     styled(s, number + it.body)
   }
